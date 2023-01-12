@@ -1,0 +1,27 @@
+from bottle import route, run, Bottle, ServerAdapter
+from gpiozero import LED, Button
+import requests
+ 
+leds = [LED(18), LED(23), LED(24)]
+ 
+@route('/')
+@route('/<led_number>')
+def index(led_number="n"):
+    global webHosting
+   
+    if led_number != "n":
+        leds[int(led_number)].toggle()
+    response = "<script>"
+    response += "function changed(led)"
+    response += "{"
+    response += "  window.location.href='/' + led"
+    response += "}"
+    response += "</script>"
+   
+    response += '<h1>Door Access Requested</h1>'
+    response += '<h2>Grant Access?</h2>'
+    response += " <input type='button' onClick='changed(" + '0' + ")' value='Accept'/>"
+    response += " <input type='button' onClick='changed(" + '1' + ")' value='Decline'/>”
+    return response
+ 
+run(host='0.0.0.0', port=80) #run on 10.0.0.64
