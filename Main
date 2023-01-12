@@ -1,0 +1,67 @@
+from gpiozero import LED, Button
+from time import sleep
+import smtplib
+from datetime import datetime
+ 
+requestActive=False
+ 
+def send_email(recipient, subject, text):
+    smtpserver = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+    smtpserver.ehlo()
+    smtpserver.starttls()
+    smtpserver.ehlo
+    smtpserver.login(GMAIL_USER, GMAIL_PASS)
+    header = 'To:'+recipient+'\n'+'From: '+ GMAIL_USER
+    header = header + '\n' + 'Subject: '+ subject +'\n'
+    msg = header + '\n' +text + ' \n\n'
+    smtpserver.sendmail(GMAIL_USER, recipient, msg)
+    smtpserver.close()
+ 
+ 
+def do_stuff():  #when button is pressed
+   
+    #send email, request now pending, leds blink yellow, host server
+    global webHosting
+    global requestActive
+    print("Button Pressed")
+   
+    if requestActive:
+        requestActive = False
+        leds[0].off()
+        leds[1].off()
+        body ='Previous request canceled.'
+        subject = 'Entry request canceled'
+    else:
+        requestActive = True
+        i=0
+        while(i<2):
+            leds[0].on()
+            leds[1].on()
+            sleep(0.25)
+            leds[0].off()
+            leds[1].off()
+            sleep(0.25)
+            i+=1
+           
+        leds[0].on()
+        leds[1].on()
+           
+        body ='Door access requested at '+currentTime+': \n\n Accept or Decline: https://10.0.0.64'
+        subject = 'Door Access Requested'
+    send_email('jgartzke0@gmail.com', subject, body)
+    return
+ 
+currentTime = datetime.now().strftime('%H:%M:%S')
+   
+GMAIL_USER = 'jgartzke0@gmail.com'
+GMAIL_PASS = 'rayf qfjr oopm izfs'
+SMTP_SERVER = 'smtp.gmail.com'
+SMTP_PORT = 587
+ 
+leds = [LED(18), LED(23), LED(24)]
+button = Button(2)                
+button.when_pressed = do_stuff
+ 
+while True:
+    print('Monitoring button')
+    sleep(2)
